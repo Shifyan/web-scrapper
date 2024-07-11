@@ -10,6 +10,7 @@ const prompt = require("prompt-sync")();
 const ExcelJS = require("exceljs");
 const workbook = new ExcelJS.Workbook();
 const sheet = workbook.addWorksheet("My Sheet");
+let nextPage = 2;
 
 const keyword = prompt(`Masukkan Pencarian: `);
 (async function crawler() {
@@ -24,6 +25,7 @@ const keyword = prompt(`Masukkan Pencarian: `);
     const data = [];
     // Logika untuk mengklik "Berikutnya" sampai habis
     let hasNextPage = true;
+
     while (hasNextPage) {
       // Tunggu hingga elemen "titleField" muncul di halaman
       await driver.wait(
@@ -47,14 +49,10 @@ const keyword = prompt(`Masukkan Pencarian: `);
         };
         data.push(dataBuku);
       }
-
-      // for (let a = 1; a <= titleElements.length; a++) {
-      //   await console.log(titleElements[a]);
-      // }
       // Periksa apakah tautan "Berikutnya" ada
       let nextLink;
       try {
-        nextLink = await driver.findElement(By.linkText("2"));
+        nextLink = await driver.findElement(By.linkText(`${nextPage}`));
       } catch (error) {
         hasNextPage = false; // Jika "next_link" tidak ditemukan, berhenti
       }
@@ -65,9 +63,11 @@ const keyword = prompt(`Masukkan Pencarian: `);
         // Tunggu sebentar untuk memastikan halaman dimuat
         await driver.sleep(2000);
       }
+      nextPage++;
     }
+    await console.log("Selesai Mencari");
     await console.log(data);
   } finally {
-    await console.log("berhasil di cari");
+    await driver.close();
   }
 })();
