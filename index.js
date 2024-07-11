@@ -10,7 +10,6 @@ const prompt = require("prompt-sync")();
 const ExcelJS = require("exceljs");
 const workbook = new ExcelJS.Workbook();
 const sheet = workbook.addWorksheet("My Sheet");
-let nextPage = 2;
 
 const keyword = prompt(`Masukkan Pencarian: `);
 (async function crawler() {
@@ -23,8 +22,16 @@ const keyword = prompt(`Masukkan Pencarian: `);
     // Tunggu hingga elemen dengan className "titleField" ditemukan
     await driver.wait(until.elementLocated(By.className("titleField")), 10000);
     const data = [];
+
     // Logika untuk mengklik "Berikutnya" sampai habis
     let hasNextPage = true;
+    let nextPage = 2;
+    let isNextLinkFound;
+    try {
+      isNextLinkFound = await driver.findElement(By.className(`next_link`));
+    } catch (error) {
+      isNextLinkFound = false;
+    }
 
     while (hasNextPage) {
       // Tunggu hingga elemen "titleField" muncul di halaman
@@ -49,10 +56,15 @@ const keyword = prompt(`Masukkan Pencarian: `);
         };
         data.push(dataBuku);
       }
+
       // Periksa apakah tautan "Berikutnya" ada
       let nextLink;
       try {
-        nextLink = await driver.findElement(By.linkText(`${nextPage}`));
+        if (isNextLinkFound) {
+          nextLink = await driver.findElement(By.className(`next_link`));
+        } else {
+          nextLink = await driver.findElement(By.linkText(`${nextPage}`));
+        }
       } catch (error) {
         hasNextPage = false; // Jika "next_link" tidak ditemukan, berhenti
       }
