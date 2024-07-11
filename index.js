@@ -21,8 +21,7 @@ const keyword = prompt(`Masukkan Pencarian: `);
 
     // Tunggu hingga elemen dengan className "titleField" ditemukan
     await driver.wait(until.elementLocated(By.className("titleField")), 10000);
-    let a = 1;
-
+    const data = [];
     // Logika untuk mengklik "Berikutnya" sampai habis
     let hasNextPage = true;
     while (hasNextPage) {
@@ -36,12 +35,22 @@ const keyword = prompt(`Masukkan Pencarian: `);
       const titleElements = await driver.findElements(
         By.className("titleField")
       );
-      for (let titleElement of titleElements) {
-        const textTitle = await titleElement.getText();
-        console.log(a + "-" + textTitle);
-        a++;
+      const authorElements = await driver.findElements(By.className("author"));
+
+      for (let i = 0; i < titleElements.length; i++) {
+        const titleText = await titleElements[i].getText();
+        const authorText = await authorElements[i].getText();
+
+        let dataBuku = {
+          judul: titleText,
+          penulis: authorText,
+        };
+        data.push(dataBuku);
       }
 
+      // for (let a = 1; a <= titleElements.length; a++) {
+      //   await console.log(titleElements[a]);
+      // }
       // Periksa apakah tautan "Berikutnya" ada
       let nextLink;
       try {
@@ -57,6 +66,7 @@ const keyword = prompt(`Masukkan Pencarian: `);
         await driver.sleep(2000);
       }
     }
+    await console.log(data);
   } finally {
     await console.log("berhasil di cari");
   }
