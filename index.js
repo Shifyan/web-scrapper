@@ -6,17 +6,22 @@ const {
   Key,
   chromium,
 } = require("selenium-webdriver");
+const prompt = require("prompt-sync")();
+const ExcelJS = require("exceljs");
+const workbook = new ExcelJS.Workbook();
+const sheet = workbook.addWorksheet("My Sheet");
 
+const keyword = prompt(`Masukkan Pencarian: `);
 (async function crawler() {
   let driver = await new Builder().forBrowser(Browser.CHROME).build();
   try {
     await driver.get("https://opac.iainponorogo.ac.id/index.php");
-    await driver.findElement(By.id("keyword")).sendKeys("SD");
+    await driver.findElement(By.id("keyword")).sendKeys(keyword);
     await driver.findElement(By.name("search")).click();
 
-    await driver.wait(until.elementLocated(By.className("titleField")), 10000);
     // Tunggu hingga elemen dengan className "titleField" ditemukan
     await driver.wait(until.elementLocated(By.className("titleField")), 10000);
+    let a = 1;
 
     // Logika untuk mengklik "Berikutnya" sampai habis
     let hasNextPage = true;
@@ -33,13 +38,14 @@ const {
       );
       for (let titleElement of titleElements) {
         const textTitle = await titleElement.getText();
-        console.log(textTitle);
+        console.log(a + "-" + textTitle);
+        a++;
       }
 
       // Periksa apakah tautan "Berikutnya" ada
       let nextLink;
       try {
-        nextLink = await driver.findElement(By.className("next_link"));
+        nextLink = await driver.findElement(By.linkText("2"));
       } catch (error) {
         hasNextPage = false; // Jika "next_link" tidak ditemukan, berhenti
       }
