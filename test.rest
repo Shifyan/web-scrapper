@@ -1,2 +1,0 @@
-#
-GET https://opac.iainponorogo.ac.id/index.php?keywords=pendidikan&search=search
