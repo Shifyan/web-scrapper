@@ -1,11 +1,4 @@
-const {
-  Builder,
-  By,
-  until,
-  Browser,
-  Key,
-  chromium,
-} = require("selenium-webdriver");
+const { Builder, By, until, Browser } = require("selenium-webdriver");
 const prompt = require("prompt-sync")();
 const ExcelJS = require("exceljs");
 
@@ -16,7 +9,30 @@ sheet.columns = [
   { header: "Penulis", key: "penulis", width: "50" },
 ];
 
-const keyword = prompt(`Masukkan Pencarian: `);
+const isEmpty = (keyword) => {
+  const keywordTrim = keyword.trim();
+  return keywordTrim.length === 0;
+};
+
+let keyword;
+
+do {
+  keyword = prompt("Masukkan Pencarian: ");
+  if (isEmpty(keyword)) {
+    console.warn("Pencarian Tidak Boleh Kosong");
+  }
+} while (isEmpty(keyword));
+
+let maxResult;
+
+do {
+  const input = prompt("Berapa Maksimal Hasil Pencarian: ");
+  maxResult = parseInt(input);
+  if (isNaN(maxResult)) {
+    console.warn("Anda Memasukkan Bukan Angka!!");
+  }
+} while (isNaN(maxResult));
+
 (async function crawler() {
   let driver = await new Builder().forBrowser(Browser.CHROME).build();
   try {
@@ -101,7 +117,6 @@ const keyword = prompt(`Masukkan Pencarian: `);
 
       await workbook.xlsx.writeFile(`./hasil/${keyword}.xlsx`);
       await console.log("Selesai Mencari");
-      await console.log(data);
     } catch (err) {
       console.warn("Data Tidak Ditemukan");
     }
