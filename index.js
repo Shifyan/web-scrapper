@@ -2,6 +2,7 @@ const { Builder, By, until, Browser } = require("selenium-webdriver");
 const prompt = require("prompt-sync")();
 const ExcelJS = require("exceljs");
 
+// Inisiasi ExcelJS
 const workbook = new ExcelJS.Workbook();
 const sheet = workbook.addWorksheet("MySheet");
 sheet.columns = [
@@ -9,11 +10,13 @@ sheet.columns = [
   { header: "Penulis", key: "penulis", width: "50" },
 ];
 
+// Fungsi Cek Apakah string Kosong
 const isEmpty = (keyword) => {
   const keywordTrim = keyword.trim();
   return keywordTrim.length === 0;
 };
 
+// Melakukan Input Search Keyword beserta Validasi Input
 let keyword;
 
 do {
@@ -23,6 +26,7 @@ do {
   }
 } while (isEmpty(keyword));
 
+// Melakukan Input Max Result beserta Validasi Input
 let maxResult;
 
 do {
@@ -33,6 +37,7 @@ do {
   }
 } while (isNaN(maxResult));
 
+// Memulai Crawler
 (async function crawler() {
   let driver = await new Builder().forBrowser(Browser.CHROME).build();
   try {
@@ -52,6 +57,7 @@ do {
       let hasNextPage = true;
       let nextPage = 2;
       let isNextLinkFound;
+      let isMaxResult = false;
       try {
         isNextLinkFound = await driver.findElement(By.className(`next_link`));
       } catch (error) {
@@ -89,6 +95,10 @@ do {
             };
           }
           data.push(dataBuku);
+          if (data.length === maxResult) {
+            isMaxResult = true;
+            i = titleElements.length;
+          }
         }
 
         // Periksa apakah tautan "Berikutnya" ada
@@ -98,6 +108,9 @@ do {
             nextLink = await driver.findElement(By.className(`next_link`));
           } else {
             nextLink = await driver.findElement(By.linkText(`${nextPage}`));
+          }
+          if (isMaxResult) {
+            hasNextPage = false;
           }
         } catch (error) {
           hasNextPage = false; // Jika "next_link" tidak ditemukan, berhenti
