@@ -71,7 +71,7 @@ do {
           10000
         );
 
-        // Proses elemen "titleField" di halaman saat ini
+        // Proses elemen "titleField" dan "Author" di halaman saat ini
         const titleElements = await driver.findElements(
           By.className("titleField")
         );
@@ -83,6 +83,8 @@ do {
           const titleText = await titleElements[i].getText();
           const authorText = await authorElements[i].getText();
           let dataBuku;
+
+          // Cek Kesalahan Crawling
           if (titleText == "" && authorText == "") {
             dataBuku = {
               judul: "Judul Tidak Termuat",
@@ -94,6 +96,7 @@ do {
               penulis: authorText,
             };
           }
+          // Push data buku ke Array
           data.push(dataBuku);
           if (data.length === maxResult) {
             isMaxResult = true;
@@ -109,11 +112,13 @@ do {
           } else {
             nextLink = await driver.findElement(By.linkText(`${nextPage}`));
           }
+          // Periksa apakah sudah memenuhi maksimal result
           if (isMaxResult) {
             hasNextPage = false;
           }
         } catch (error) {
-          hasNextPage = false; // Jika "next_link" tidak ditemukan, berhenti
+          // Jika "next_link" tidak ditemukan, berhenti
+          hasNextPage = false;
         }
 
         if (hasNextPage && nextLink) {
